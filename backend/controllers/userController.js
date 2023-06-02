@@ -1,4 +1,6 @@
 const userService = require("../services/userService");
+const validator = require("email-validator");
+
 
 exports.getAllUsers = async (req, res) => {
     try {
@@ -11,10 +13,19 @@ exports.getAllUsers = async (req, res) => {
 
 exports.createUser = async (req, res) => {
     try {
-        const user = await userService.createUser(req.body);
-        res.json({ data: user, status: "succes"});
-    } catch (err) {
-        res.status(500).json({ error: err.message});
+        
+        
+        if (validator.validate(req.body.email)) {
+            const user = await userService.createUser(req.body);
+            res.json({ data: user, status: "succes"});
+        } else {
+
+            res.status(400).json({ error: 'email deja pris'});
+        }
+        
+    } catch (err) {        
+        res.status(500).json({ error : err.message});
+
     }
 };
 
@@ -42,5 +53,16 @@ exports.deleteUser = async (req, res) => {
         res.json({ data: user, status: "success"});
     } catch (err) {
         res.status(500).json({error : err.message});
+    }
+};
+
+exports.loginUser = async (req, res) => {
+    try {
+        const user = await userService.loginUser(req.body.password);
+        res.json({ data: user, status: "succes"});
+        
+    } catch (err) {        
+        res.status(500).json({ error : err.message});
+
     }
 };
