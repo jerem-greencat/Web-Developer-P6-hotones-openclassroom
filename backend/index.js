@@ -15,6 +15,7 @@ app.use(cors());
 app.set('secretKey', secretKey);
 
 
+
 mongoose.connect("mongodb+srv://jmusedev32:ewilan650@hotonesdatabase.r9sudol.mongodb.net/?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
 .then(() => console.log('Connexion réussie à la base de données MongoDB'))
 .catch((err) => console.error('Erreur lors de la connexion à la base de données', err));
