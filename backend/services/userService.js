@@ -1,7 +1,7 @@
 const userModel = require("../models/user");
 const bcrypt = require('bcrypt');
-
- 
+const jwt = require('jsonwebtoken');
+const validator = require("email-validator");
 
 
 
@@ -22,8 +22,6 @@ exports.createUser = async (user) => {
 
 exports.getUserById = async (id) => {
 
-    const cryptedPassword = await bcrypt.compare(password, user.password);
-
     return await userModel.findById(id);
 };
 
@@ -36,13 +34,21 @@ exports.deleteUser = async (id) => {
 };
 
 exports.loginUser = async (user) => {
-    const isValid = false;
-    bcrypt.compare(user.password, hash, function(err, result) {
-        if (result) {
-            isValid = true;
-        }
-    });
+    const {email, password} = user;
 
-    return await userModel.create(user);
+    const existingUser = await userModel.findOne({ email});
+
+    if (!existingUser) {
+        throw new Error("Adresse e-mail non valide");
+    }
+
+    const passwordMatch = await bcrypt.compare(password, existingUser.password);
+
+    if (!passwordMatch) {
+        throw new Error("Mot de passe incorrect");
+    }
+
+    const token = jwt.sign({userId: existingUser._id}, 'secretKey');
+    return token;
 };
-// Vérification de l'email : plugin email validator
+

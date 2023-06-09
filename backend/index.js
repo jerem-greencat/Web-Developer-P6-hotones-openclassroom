@@ -2,13 +2,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors')
 const routes = require('./routes/route');
-// const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const app = express();
 const port = 3000;
+const secretKey = crypto.randomBytes(32).toString('hex');
+console.log('Clé secrète :', secretKey);
 
 app.use(express.json());
 app.use(cors());
+app.set('secretKey', secretKey);
 
 
 mongoose.connect("mongodb+srv://jmusedev32:ewilan650@hotonesdatabase.r9sudol.mongodb.net/?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
