@@ -11,13 +11,9 @@ exports.getAllUsers = async () => {
 
 exports.createUser = async (user) => {
 
-
-
         const cryptedPassword = await bcrypt.hash(user.password, 10);
         user.password = cryptedPassword;
         return await userModel.create(user);
-    
-
 };
 
 exports.getUserById = async (id) => {

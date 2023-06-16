@@ -21,7 +21,21 @@ router.delete('/api/users/:id', authenticateToken, userController.deleteUser);
 // Routes pour les sauces
 router.get('/api/sauces', sauceController.getAllSauces);
 router.get('/api/sauces/:id', sauceController.getSauceById);
+
+// Route pour la création d'une sauce
 router.post('/api/sauces', authenticateToken, upload.single('image'), sauceController.createSauce);
+
+// Route pour la mise à jour d'une sauce
+router.put('/api/sauces/:id', authenticateToken, upload.single('image'), sauceController.updateSauce);
+
+// Route pour la suppression d'une sauce
+router.delete('/api/sauces/:id', authenticateToken, sauceController.deleteSauce);
+
+// Route pour gérer les likes et dislikes d'une sauce
+router.post('/api/sauces/:id/like', authenticateToken, sauceController.likeSauce);
+
+
+
 
 
 

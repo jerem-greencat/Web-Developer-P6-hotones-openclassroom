@@ -3,7 +3,7 @@ const multer = require('multer');
 // Définir les options de configuration pour Multer
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Dossier de destination pour les fichiers téléchargés
+        cb(null, 'public/uploads/'); // Dossier de destination pour les fichiers téléchargés
     },
     filename: function (req, file, cb) {
         // Générer un nom de fichier unique
