@@ -5,6 +5,10 @@ const routes = require('./routes/route');
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
+
+
+
+
 const app = express();
 const port = 3000;
 const secretKey = crypto.randomBytes(32).toString('hex');
@@ -14,6 +18,8 @@ app.use(express.json());
 app.use(cors());
 app.set('secretKey', secretKey);
 
+// Définir le chemin statique pour fournir les images
+app.use('/uploads', express.static('public/uploads'));
 
 
 mongoose.connect("mongodb+srv://jmusedev32:ewilan650@hotonesdatabase.r9sudol.mongodb.net/?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
