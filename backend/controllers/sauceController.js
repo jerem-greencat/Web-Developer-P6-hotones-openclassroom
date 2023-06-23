@@ -27,10 +27,12 @@ exports.createSauce = async (req, res) => {
         const sauce  = JSON.parse(req.body.sauce);
         const filename  = req.file.filename;
         const userId = req.user.userId; // Récupérer l'userId à partir de req.user
-        const baseUrl = `${req.protocol}://${req.hostname}${req.baseUrl}:3000`;
+        const baseUrl = `${req.protocol}://${req.hostname}:${process.env.port}`;
 
 
         console.log("url = " + baseUrl);
+        console.log('url1 =' + req.baseUrl);
+        console.log("url2 = " + req.originalUrl);
 
 
         // Utilisez l'userId récupéré dans la création de la sauce
@@ -40,7 +42,7 @@ exports.createSauce = async (req, res) => {
             manufacturer: sauce.manufacturer,
             description: sauce.description,
             mainPepper: sauce.mainPepper,
-            imageUrl:  baseUrl + `/public/uploads/${filename}`,
+            imageUrl:  `${baseUrl}/uploads/${filename}`,
             heat: sauce.heat,
             likes: 0,
             dislikes: 0,

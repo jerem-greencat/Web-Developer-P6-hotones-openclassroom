@@ -1,7 +1,5 @@
 const express = require ('express');
 const router = express.Router();
-// const User = require('../models/user');
-// const Sauce = require('../models/sauce');
 const userController = require('../controllers/userController');
 const sauceController = require('../controllers/sauceController');
 const authenticateToken = require("../middleware/authenticateToken");
@@ -42,7 +40,6 @@ router.post('/api/sauces/:id/like', authenticateToken, sauceController.likeSauce
 // A modifier selon route de dépot d'image
 router.post('/api/images', authenticateToken, upload.single('image'), (req, res) => {
     // L'image téléchargée est accessible via req.file
-    // Effectuez ici le traitement nécessaire avec l'image téléchargée
     res.json({ message: 'Image téléchargée avec succès' });
 });
 

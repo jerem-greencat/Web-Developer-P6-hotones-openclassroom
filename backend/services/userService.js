@@ -45,6 +45,6 @@ exports.loginUser = async (user) => {
     }
 
     const token = jwt.sign({userId: existingUser._id}, 'secretKey');
-    return token;
+    return {token : token, userId : existingUser._id};
 };
 

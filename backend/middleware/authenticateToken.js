@@ -1,8 +1,4 @@
 const jwt = require('jsonwebtoken');
-// class CustomRequest extends Request {
-//     user: any;
-//     sauce : any;
-// }
 
 module.exports = (req, res, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
@@ -17,7 +13,6 @@ module.exports = (req, res, next) => {
         }
         
         req.user = decoded;
-        // (req as CustomRequest).body.user= decoded;
         console.log(req.user);
         console.log(req.body);
         next();
