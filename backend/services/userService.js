@@ -17,7 +17,6 @@ exports.createUser = async (user) => {
 };
 
 exports.getUserById = async (id) => {
-
     return await userModel.findById(id);
 };
 
