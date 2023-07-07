@@ -1,5 +1,6 @@
 const Sauce = require("../models/sauce");
 const port = require("../index");
+const jwt = require('jsonwebtoken');
 
 exports.getAllSauces = async (req, res) => {
     try {
@@ -28,13 +29,13 @@ exports.createSauce = async (req, res) => {
         const filename  = req.file.filename;
         const userId = req.user.userId; // Récupérer l'userId à partir de req.user
         const baseUrl = `${req.protocol}://${req.hostname}:${process.env.port}`;
-
-
+        
+        
         console.log("url = " + baseUrl);
         console.log('url1 =' + req.baseUrl);
         console.log("url2 = " + req.originalUrl);
-
-
+        
+        
         // Utilisez l'userId récupéré dans la création de la sauce
         const newSauce = await Sauce.create({
             userId: userId, // Utilise l'userId récupéré
@@ -60,7 +61,17 @@ exports.updateSauce = async (req, res) => {
     try {
         const sauceId = req.params.id;
         const sauceData = req.body;
+        console.log("user = " + req.user._id);
         let imageUrl = "";
+
+        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const decodedToken = jwt.decode(token);
+        
+        console.log("decode = " + decodedToken.userId);
+        
+        if (decodedToken.userId != req.body.userId) {
+            return res.status(404).json({ error: "id incorrect" });
+        }
         
         // Vérifie si une nouvelle image est téléchargée
         if (req.file) {
@@ -89,53 +100,66 @@ exports.updateSauce = async (req, res) => {
     exports.deleteSauce = async (req, res) => {
         try {
             const sauceId = req.params.id;
+            const token = req.header('Authorization')?.replace('Bearer ', '');
+            const decodedToken = jwt.decode(token);
             
-            // Supprime la sauce de la base de données
-            await Sauce.findByIdAndRemove(sauceId);
-            
-            res.json({ message: 'Sauce supprimée avec succès' });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    };
-    
-    exports.likeSauce = async (req, res) => {
-        try {
-            const sauceId = req.params.id;
-            const { userId, like } = req.body;
-            
-            const sauce = await Sauce.findById(sauceId);
-            
-            if (!sauce) {
-                return res.status(404).json({ error: 'Sauce non trouvée' });
-            }
-            
-            // Gére les likes et dislikes de la sauce en fonction de l'userId fourni
-            if (like === 1) {
-                // L'utilisateur aime la sauce
-                sauce.likes++;
-                sauce.usersLiked.push(userId);
-            } else if (like === 0) {
-                // L'utilisateur annule son like ou son dislike
-                if (sauce.usersLiked.includes(userId)) {
-                    sauce.likes--;
-                    sauce.usersLiked.pull(userId);
-                } else if (sauce.usersDisliked.includes(userId)) {
-                    sauce.dislikes--;
-                    sauce.usersDisliked.pull(userId);
-                }
-            } else if (like === -1) {
-                // L'utilisateur n'aime pas la sauce
-                sauce.dislikes++;
-                sauce.usersDisliked.push(userId);
+            console.log("decode = " + decodedToken.userId);
+            console.log("decoded2" + decodedToken);
+            console.log("sauceId = " + sauceId);
+
+            const sauceChosen = await Sauce.findById(sauceId);
+            console.log("sauceChosen = " + sauceChosen);
+
+            if (decodedToken.userId == sauceChosen.userId) {
+                await Sauce.findByIdAndRemove(sauceId);
+                res.json({ message: 'Sauce supprimée avec succès' });
             } else {
-                return res.status(400).json({ error: 'Valeur de like invalide' });
+                res.status(500).json({ error: "vous n'êtes pas authorisé a délete" });
             }
-            
-            await sauce.save();
-            
-            res.json({ message: 'Statut de like mis à jour avec succès' });
-        } catch (err) {
-            res.status(500).json({ error: err.message });
-        }
-    };
+
+                
+            } catch (err) {
+                res.status(500).json({ error: err.message });
+            }
+        };
+        
+        exports.likeSauce = async (req, res) => {
+            try {
+                const sauceId = req.params.id;
+                const { userId, like } = req.body;
+                
+                const sauce = await Sauce.findById(sauceId);
+                
+                if (!sauce) {
+                    return res.status(404).json({ error: 'Sauce non trouvée' });
+                }
+                
+                // Gére les likes et dislikes de la sauce en fonction de l'userId fourni
+                if (like === 1) {
+                    // L'utilisateur aime la sauce
+                    sauce.likes++;
+                    sauce.usersLiked.push(userId);
+                } else if (like === 0) {
+                    // L'utilisateur annule son like ou son dislike
+                    if (sauce.usersLiked.includes(userId)) {
+                        sauce.likes--;
+                        sauce.usersLiked.pull(userId);
+                    } else if (sauce.usersDisliked.includes(userId)) {
+                        sauce.dislikes--;
+                        sauce.usersDisliked.pull(userId);
+                    }
+                } else if (like === -1) {
+                    // L'utilisateur n'aime pas la sauce
+                    sauce.dislikes++;
+                    sauce.usersDisliked.push(userId);
+                } else {
+                    return res.status(400).json({ error: 'Valeur de like invalide' });
+                }
+                
+                await sauce.save();
+                
+                res.json({ message: 'Statut de like mis à jour avec succès' });
+            } catch (err) {
+                res.status(500).json({ error: err.message });
+            }
+        };
