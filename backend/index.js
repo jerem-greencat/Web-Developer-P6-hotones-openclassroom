@@ -7,9 +7,6 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 
-
-
-
 const app = express();
 const port = 3000;
 const secretKey = crypto.randomBytes(32).toString('hex');
@@ -28,11 +25,9 @@ mongoose.connect(process.env.MONGODBURL , { useNewUrlParser: true, useUnifiedTop
 .catch((err) => console.error('Erreur lors de la connexion à la base de données', err));
 
 
-
 app.use('/', routes);
 
 
 app.listen(port, () => console.log(`Serveur lancé sur le port ${port}`));
-module.exports = {port};
 
 

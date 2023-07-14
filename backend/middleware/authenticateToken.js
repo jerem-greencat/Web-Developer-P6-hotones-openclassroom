@@ -11,14 +11,9 @@ module.exports = (req, res, next) => {
         if (err) {
             return res.status(401).json({ error: err });
         }
-        // console.log()
         req.user = decoded;
         console.log(req.user);
         console.log(req.body);
         next();
     });
 };
-
-// module.exports = (req, res, next) => {
-
-// }

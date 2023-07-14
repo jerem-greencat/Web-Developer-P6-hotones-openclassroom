@@ -63,7 +63,7 @@ exports.updateSauce = async (req, res) => {
         const sauceData = req.body;
         console.log("user = " + req.user._id);
         let imageUrl = "";
-
+        
         const token = req.header('Authorization')?.replace('Bearer ', '');
         const decodedToken = jwt.decode(token);
         
@@ -103,63 +103,56 @@ exports.updateSauce = async (req, res) => {
             const token = req.header('Authorization')?.replace('Bearer ', '');
             const decodedToken = jwt.decode(token);
             
-            console.log("decode = " + decodedToken.userId);
-            console.log("decoded2" + decodedToken);
-            console.log("sauceId = " + sauceId);
-
             const sauceChosen = await Sauce.findById(sauceId);
-            console.log("sauceChosen = " + sauceChosen);
-
+            
             if (decodedToken.userId == sauceChosen.userId) {
                 await Sauce.findByIdAndRemove(sauceId);
                 res.json({ message: 'Sauce supprimée avec succès' });
             } else {
                 res.status(500).json({ error: "vous n'êtes pas authorisé a délete" });
             }
-
-                
-            } catch (err) {
-                res.status(500).json({ error: err.message });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    };
+    
+    exports.likeSauce = async (req, res) => {
+        try {
+            const sauceId = req.params.id;
+            const { userId, like } = req.body;
+            
+            const sauce = await Sauce.findById(sauceId);
+            
+            if (!sauce) {
+                return res.status(404).json({ error: 'Sauce non trouvée' });
             }
-        };
-        
-        exports.likeSauce = async (req, res) => {
-            try {
-                const sauceId = req.params.id;
-                const { userId, like } = req.body;
-                
-                const sauce = await Sauce.findById(sauceId);
-                
-                if (!sauce) {
-                    return res.status(404).json({ error: 'Sauce non trouvée' });
+            
+            // Gére les likes et dislikes de la sauce en fonction de l'userId fourni
+            if (like === 1) {
+                // L'utilisateur aime la sauce
+                sauce.likes++;
+                sauce.usersLiked.push(userId);
+            } else if (like === 0) {
+                // L'utilisateur annule son like ou son dislike
+                if (sauce.usersLiked.includes(userId)) {
+                    sauce.likes--;
+                    sauce.usersLiked.pull(userId);
+                } else if (sauce.usersDisliked.includes(userId)) {
+                    sauce.dislikes--;
+                    sauce.usersDisliked.pull(userId);
                 }
-                
-                // Gére les likes et dislikes de la sauce en fonction de l'userId fourni
-                if (like === 1) {
-                    // L'utilisateur aime la sauce
-                    sauce.likes++;
-                    sauce.usersLiked.push(userId);
-                } else if (like === 0) {
-                    // L'utilisateur annule son like ou son dislike
-                    if (sauce.usersLiked.includes(userId)) {
-                        sauce.likes--;
-                        sauce.usersLiked.pull(userId);
-                    } else if (sauce.usersDisliked.includes(userId)) {
-                        sauce.dislikes--;
-                        sauce.usersDisliked.pull(userId);
-                    }
-                } else if (like === -1) {
-                    // L'utilisateur n'aime pas la sauce
-                    sauce.dislikes++;
-                    sauce.usersDisliked.push(userId);
-                } else {
-                    return res.status(400).json({ error: 'Valeur de like invalide' });
-                }
-                
-                await sauce.save();
-                
-                res.json({ message: 'Statut de like mis à jour avec succès' });
-            } catch (err) {
-                res.status(500).json({ error: err.message });
+            } else if (like === -1) {
+                // L'utilisateur n'aime pas la sauce
+                sauce.dislikes++;
+                sauce.usersDisliked.push(userId);
+            } else {
+                return res.status(400).json({ error: 'Valeur de like invalide' });
             }
-        };
+            
+            await sauce.save();
+            
+            res.json({ message: 'Statut de like mis à jour avec succès' });
+        } catch (err) {
+            res.status(500).json({ error: err.message });
+        }
+    };
