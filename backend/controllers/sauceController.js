@@ -75,9 +75,6 @@ exports.updateSauce = async (req, res) => {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         const decodedToken = jwt.decode(token);
         
-        console.log("decode = " + decodedToken.userId);
-        console.log("body UserId = " + req.body.userId);
-        
         if (decodedToken.userId != req.body.userId) {
             return res.status(404).json({ error: "id incorrect" });
         }
