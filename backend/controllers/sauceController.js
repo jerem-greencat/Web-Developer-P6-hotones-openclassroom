@@ -1,6 +1,9 @@
 const Sauce = require("../models/sauce");
 const port = require("../index");
 const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 exports.getAllSauces = async (req, res) => {
     try {
@@ -28,13 +31,15 @@ exports.createSauce = async (req, res) => {
         const sauce  = JSON.parse(req.body.sauce);
         const filename  = req.file.filename;
         const userId = req.user.userId; // Récupérer l'userId à partir de req.user
-        const baseUrl = `${req.protocol}://${req.hostname}:${process.env.port}`;
+
+
+        // La ligne 37 correspond à l'ancienne variable qui donnée une valeur éronnée en cas de mise en prod
+        // const baseUrl = `${req.protocol}://${req.hostname}:${process.env.port}`;
         
-        
-        console.log("url = " + baseUrl);
-        console.log('url1 =' + req.baseUrl);
-        console.log("url2 = " + req.originalUrl);
-        
+    
+        // Les lignes 45 & 46 définissent dynamiquement le nouvel url d'enregistrement des fichiers images. En local l'url s'enregistre dans la bdd toujours en tant que http://mon_localhost:mon_port tandis qu'en mise en prod celà s'enregistrera sous le nom de domaine qui nous intéresse.
+        const domain = req.get('host');
+        process.env.UPLOAD_DIR = `${req.protocol}://${domain}/uploads/`;
         
         // Utilisez l'userId récupéré dans la création de la sauce
         const newSauce = await Sauce.create({
@@ -43,7 +48,10 @@ exports.createSauce = async (req, res) => {
             manufacturer: sauce.manufacturer,
             description: sauce.description,
             mainPepper: sauce.mainPepper,
-            imageUrl:  `${baseUrl}/uploads/${filename}`,
+
+            // Définis l'url enregistré dans la bdd selon les variables définies lignes 45 & 46
+            imageUrl:  process.env.UPLOAD_DIR + filename,
+            // imageUrl:  `${baseUrl}/uploads/${filename}`,
             heat: sauce.heat,
             likes: 0,
             dislikes: 0,
@@ -68,6 +76,7 @@ exports.updateSauce = async (req, res) => {
         const decodedToken = jwt.decode(token);
         
         console.log("decode = " + decodedToken.userId);
+        console.log("body UserId = " + req.body.userId);
         
         if (decodedToken.userId != req.body.userId) {
             return res.status(404).json({ error: "id incorrect" });
